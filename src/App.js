@@ -15,7 +15,8 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth'
 
 import './app.css'
@@ -48,6 +49,26 @@ function App() {
     }
 
     loadPosts();
+  }, [])
+
+  useEffect(() => {
+    async function checkLogin() {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(true);
+          setUserDetail({
+            uid: user.uid,
+            email: user.email,
+          })
+        } else {
+          setUser(false);
+          setUserDetail({});
+        }
+      })
+    }
+
+    checkLogin();
+
   }, [])
 
   async function buscarPost() {
@@ -199,7 +220,7 @@ function App() {
       {user && (
         <div>
           <strong> Seja bem-vindo(a) (Você está logado!)</strong> <br />
-          <span>ID: {userDetail.uid} - E-mail: {userDetail.email} </span>
+          <span>ID: {userDetail.uid} - E-mail: {userDetail.email} </span> <br />
           <button onClick={fazerLogout}>Sair</button>
           <br /><br />
         </div>
