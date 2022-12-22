@@ -1,5 +1,5 @@
 # Sobre
-Projeto construido com RReact js e Firebase (firebase.google.com)
+Projeto construido com RReact js e Firebase (firebase.google.com) - Clould Firestore
 
 # Getting Started with Create React App
 
