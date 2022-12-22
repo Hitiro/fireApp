@@ -13,7 +13,9 @@ import {
 } from 'firebase/firestore'
 
 import {
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
 } from 'firebase/auth'
 
 import './app.css'
@@ -24,6 +26,8 @@ function App() {
   const [idPost, setIdPost] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [user, setUser] = useState(false);
+  const [userDetail, setUserDetail] = useState({});
 
   const [posts, setPosts] = useState([]);
 
@@ -157,10 +161,49 @@ function App() {
       })
   }
 
+  async function logarUsuario() {
+    await signInWithEmailAndPassword(auth, email, senha)
+      .then((value) => {
+        console.log("Login efetuado com sucesso!" + value)
+        console.log(value.user);
+
+        setUserDetail({
+          uid: value.user.uid,
+          email: value.user.email,
+        })
+
+        setUser(true);
+
+        setEmail('');
+        setSenha('');
+      })
+      .catch((error) => {
+        if (error.code === 'auth/invalid-email') {
+          alert("E-mail ou senha inválidos");
+        }
+        console.log(error)
+      })
+  }
+
+  async function fazerLogout() {
+    await signOut(auth);
+    setUser(false);
+    setUserDetail({});
+  }
+
 
   return (
     <div>
       <h1>ReactJS + Firebase :)</h1>
+
+      {user && (
+        <div>
+          <strong> Seja bem-vindo(a) (Você está logado!)</strong> <br />
+          <span>ID: {userDetail.uid} - E-mail: {userDetail.email} </span>
+          <button onClick={fazerLogout}>Sair</button>
+          <br /><br />
+        </div>
+      )}
 
       <div className="container">
         <h2>Usuarios</h2>
@@ -180,6 +223,8 @@ function App() {
 
 
         <button onClick={novoUsuario}>Cadastrar</button>
+        <button onClick={logarUsuario}>Fazer Login</button>
+
 
 
       </div>
