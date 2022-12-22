@@ -1,19 +1,42 @@
 import { db } from './firebaseConnection'
-import './app.css'
 import { useState } from 'react';
-import { doc, setDoc, collection, addDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, collection, addDoc, getDoc, getDocs } from 'firebase/firestore'
+
+import './app.css'
 
 function App() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
 
-  async function buscarPost() {
-    const postRef = doc(db, "posts", "duWBJFpmHHO46B8jkbrB")
+  const [posts, setPosts] = useState([]);
 
-    await getDoc(postRef)
+  async function buscarPost() {
+    // const postRef = doc(db, "posts", "duWBJFpmHHO46B8jkbrB")
+
+    // await getDoc(postRef)
+    //   .then((snapshot) => {
+    //     setAutor(snapshot.data().autor);
+    //     setTitulo(snapshot.data().titulo);
+    //   })
+    //   .catch((error) => {
+    //     console.log("Erro ao buscar " + error);
+    //   })
+
+    const postsRef = collection(db, "posts");
+
+    await getDocs(postsRef)
       .then((snapshot) => {
-        setAutor(snapshot.data().autor);
-        setTitulo(snapshot.data().titulo);
+        let lista = [];
+
+        snapshot.forEach((doc) => {
+          lista.push({
+            id: doc.id,
+            titulo: doc.data().titulo,
+            autor: doc.data().autor,
+          })
+        })
+
+        setPosts(lista);
       })
       .catch((error) => {
         console.log("Erro ao buscar " + error);
@@ -68,6 +91,17 @@ function App() {
 
         <button onClick={handleAdd}> Cadastrar </button>
         <button onClick={buscarPost}> Buscar Post</button>
+
+        <ul>
+          {posts.map((post) => {
+            return (
+              <li key={post.id}>
+                <span>Título: {post.titulo} </span><br />
+                <span>Autor: {post.autor} </span><br /><br />
+              </li>
+            )
+          })}
+        </ul>
       </div>
     </div>
   );
