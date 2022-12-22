@@ -1,4 +1,4 @@
-import { db } from './firebaseConnection'
+import { db, auth } from './firebaseConnection'
 import { useState, useEffect } from 'react';
 import {
   doc,
@@ -12,12 +12,18 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 
+import {
+  createUserWithEmailAndPassword
+} from 'firebase/auth'
+
 import './app.css'
 
 function App() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [idPost, setIdPost] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
   const [posts, setPosts] = useState([]);
 
@@ -132,18 +138,64 @@ function App() {
 
   }
 
+  async function novoUsuario() {
+    await createUserWithEmailAndPassword(auth, email, senha)
+      .then(() => {
+        console.log("Usuario cadastrado com suucesso!")
+        setEmail('');
+        setSenha('');
+      })
+      .catch((error) => {
+        if (error.code === 'auth/weak-password') {
+          alert("Senha muito fraca");
+        } else if (error.code === 'auth/email-already-in-use') {
+          alert("E-mail já cadastrado")
+        } else if (error.code === 'auth/invalid-email') {
+          alert("E-mail inválido");
+        }
+        console.log("Erro ao cadastrar usuário: " + error)
+      })
+  }
+
 
   return (
     <div>
       <h1>ReactJS + Firebase :)</h1>
 
       <div className="container">
+        <h2>Usuarios</h2>
+        <label>E-Mail</label>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Digite um e-mail"
+        /><br />
+
+        <label>Senha</label>
+        <input
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          placeholder="Digite a sua senha"
+        /><br />
+
+
+        <button onClick={novoUsuario}>Cadastrar</button>
+
+
+      </div>
+
+      <br /><br />
+
+      <hr />
+
+      <div className="container">
+        <h2>Posts</h2>
         <label>ID do Post</label>
         <input
           placeholder='Digite o ID do post'
           value={idPost}
           onChange={(e) => setIdPost(e.target.value)}
-        />
+        /><br />
 
         <label>Titulo: </label>
         <textarea
@@ -173,6 +225,7 @@ function App() {
                 <span>Título: {post.titulo} </span><br />
                 <span>Autor: {post.autor} </span><br />
                 <button onClick={() => excluirPost(post.id)}>Excluir</button>
+                <br /><br />
               </li>
             )
           })}
